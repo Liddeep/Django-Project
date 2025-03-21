@@ -1,5 +1,5 @@
-
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +10,7 @@ from .permissions import IsprofileOwner
 # Create your views here.
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def ObtenerPerfil(request):
     try:
@@ -21,6 +22,7 @@ def ObtenerPerfil(request):
     return Response(serializer.data)
     
 @api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated, IsprofileOwner])
 def ActualizarPerfil(request):
     try:

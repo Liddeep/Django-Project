@@ -1,0 +1,9 @@
+*sqlite3
+env/
+djangoproject/
+login/migrations/
+login/__pycache__/
+registro/migrations/
+registro/__pycache__/
+gestion/migrations/
+gestion/__pycache__/
