@@ -18,16 +18,17 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from registro.views import RegistrarUsuario
-from gestion.views import ObtenerPerfil, ActualizarPerfil, ia_endpoint
+from gestion.views import ObtenerPerfil, ActualizarPerfil
 from login.views import login_view
+from ia_chat.views import ProcessPromptView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/register/', RegistrarUsuario, name='Registro de Usuario'),
     path('api/user/', ObtenerPerfil, name='perfil_usuario'),
     path('api/user/edit/', ActualizarPerfil, name='modificar_perfil'),
-    path('ia/', ia_endpoint, name='chat_ia'),
     path('api/login/', login_view, name='login'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('process-prompt/', ProcessPromptView.as_view(), name='process_prompt'),
 ]

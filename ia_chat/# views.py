@@ -9,33 +9,33 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 def generate_prompt(initial_prompt, user):
     """
-    Genera un prompt más elaborado en base al prompt inicial y a la información del usuario.
+    Genera un prompt más elaborado en base al prompt inicial y la información del usuario.
     """
     # Accede a la información del usuario
+    username = user.username
     first_name = user.first_name
     last_name = user.last_name
     email = user.email
-    tipo_de_sangre = user.tipo_de_sangre
-    alergias = user.alergias
-    antecedentes_medicos = user.antecedentes_medicos
-    medicacion = user.medicacion
-    historial_de_vacunas = user.historialvacunas
-    sintomas = user.sintomas
-    
-    # Formateo del prompt
+
+
+
+
+
+
+    # Formatea el prompt
     generated_prompt = f"""
     Crea un prompt optimo en base a los siguientes datos:
-    - Nombre del paciente: {first_name}
-    - Apellido del paciente: {last_name}
-    - Correo electronico del paciente: {email}
-    - Tipo de sangre del paciente: {tipo_de_sangre}
-    - Alergias del paciente: {alergias}
-    - Antecendentes medicos del paciente: {antecedentes_medicos}
-    - Medicación del paciente: {medicacion}
-    - Historial de vacunas del paciente: {historial_de_vacunas}
-    - Sintomas del paciente: {sintomas}
-    - prompt inicial: {initial_prompt}
+    - Nombre de usuario: {username}
+    - Nombre: {first_name}
+    - Apellido: {last_name}
+    - Email: {email}
+    - Profesión: {profesion}
+    - Finalidad de uso: {fin_uso}
+    - Prompt inicial: {initial_prompt}
     """
+
+
+
     return generated_prompt.strip()
 
 def ask_ollama(prompt):
@@ -69,14 +69,14 @@ class ProcessPromptView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Paso 2: Generar un prompt más elaborado
-        generated_prompt = generate_prompt(initial_prompt, request.user)
+        # Paso 2: Generar un prompt más elaborado utilizando la información del usuario
+        generated_prompt = generate_prompt(initial_prompt, request.user) # Pasar el usuario
 
         # Paso 3: Enviar el prompt final a Ollama y obtener la respuesta
         bot_response = ask_ollama(generated_prompt)
 
         # Paso 4: Guardar la conversación en la base de datos
-        Conversation.objects.create(
+        conversation = Conversation.objects.create(
             initial_prompt=initial_prompt,
             generated_prompt=generated_prompt,
             bot_response=bot_response
@@ -86,6 +86,5 @@ class ProcessPromptView(APIView):
         return Response({
             'initial_prompt': initial_prompt,
             'generated_prompt': generated_prompt,
-            'bot_response': bot_response,
-            'conversation_id': Conversation.id,
+            'bot_response': bot_response
         }, status=status.HTTP_200_OK)

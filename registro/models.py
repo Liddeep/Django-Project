@@ -13,6 +13,7 @@ class Usuario(AbstractUser):
     antecedentes_medicos = models.TextField(blank=True, null=True)
     medicacion = models.TextField(blank=True, null=True)
     historial_vacunas = models.TextField(blank=True, null=True)
+    sintomas = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.tipo_de_sangre} - {self.alergias} - {self.antecedentes_medicos}'

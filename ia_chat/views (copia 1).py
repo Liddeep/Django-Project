@@ -72,20 +72,24 @@ class ProcessPromptView(APIView):
         # Paso 2: Generar un prompt más elaborado
         generated_prompt = generate_prompt(initial_prompt, request.user)
 
-        # Paso 3: Enviar el prompt final a Ollama y obtener la respuesta
-        bot_response = ask_ollama(generated_prompt)
+        # Paso 3: Generar un prompt final (opcional, según tu lógica)
+        final_prompt = ask_ollama(generated_prompt)
 
-        # Paso 4: Guardar la conversación en la base de datos
+        # Paso 4: Enviar el prompt final a Ollama y obtener la respuesta
+        bot_response = ask_ollama(final_prompt)
+
+        # Paso 5: Guardar la conversación en la base de datos
         Conversation.objects.create(
+            user=request.user,
             initial_prompt=initial_prompt,
-            generated_prompt=generated_prompt,
+            generated_prompt=final_prompt,
             bot_response=bot_response
         )
 
-        # Paso 5: Retornar la respuesta al usuario
+        # Paso 6: Retornar la respuesta al usuario
         return Response({
             'initial_prompt': initial_prompt,
-            'generated_prompt': generated_prompt,
+            'generated_prompt': final_prompt,
             'bot_response': bot_response,
             'conversation_id': Conversation.id,
         }, status=status.HTTP_200_OK)

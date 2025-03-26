@@ -138,6 +138,9 @@ REST_FRAMEWORK = {
         "DEFAULT_AUTENTICATION_CLASSES": [
             'rest_framework_simplejwt.authentication.JWTAuthentication',
         ],
+        'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        ],
 }
 
 JWT_AUTH_URL = "http://34.224.222.36:8010/api/token/"
