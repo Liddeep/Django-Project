@@ -25,8 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-jos0^s!h#^+=$uk6#0@%zw6qhcqgk^gfrudjd7u(bw^q+e2hkp'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = bool( os.environ.get('DJANGO_DEBUG', False) )
+DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
@@ -138,12 +137,9 @@ REST_FRAMEWORK = {
         "DEFAULT_AUTENTICATION_CLASSES": [
             'rest_framework_simplejwt.authentication.JWTAuthentication',
         ],
-        'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-        ],
 }
 
-JWT_AUTH_URL = "http://34.224.222.36:8010/api/token/"
+JWT_AUTH_URL = "http://localhost:8000/api/token/"
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
@@ -151,5 +147,4 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
-    'ALGORITHM': 'HS256',
 }

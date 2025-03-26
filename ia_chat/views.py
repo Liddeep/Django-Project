@@ -12,29 +12,37 @@ def generate_prompt(initial_prompt, user):
     Genera un prompt más elaborado en base al prompt inicial y a la información del usuario.
     """
     # Accede a la información del usuario
-    first_name = user.first_name
-    last_name = user.last_name
-    email = user.email
-    tipo_de_sangre = user.tipo_de_sangre
-    alergias = user.alergias
-    antecedentes_medicos = user.antecedentes_medicos
-    medicacion = user.medicacion
-    historial_de_vacunas = user.historialvacunas
-    sintomas = user.sintomas
+    contexto_medico = f"""
+    tipo_de_sangre       = {user.tipo_de_sangre}
+    alergias             = {user.alergias}
+    antecedentes_medicos = {user.antecedentes_medicos}
+    medicacion           = {user.medicacion}
+    historial_de_vacunas = {user.historial_vacunas}
+    sintomas             = {user.sintomas}
+    """
     
     # Formateo del prompt
     generated_prompt = f"""
-    Crea un prompt optimo en base a los siguientes datos:
-    - Nombre del paciente: {first_name}
-    - Apellido del paciente: {last_name}
-    - Correo electronico del paciente: {email}
-    - Tipo de sangre del paciente: {tipo_de_sangre}
-    - Alergias del paciente: {alergias}
-    - Antecendentes medicos del paciente: {antecedentes_medicos}
-    - Medicación del paciente: {medicacion}
-    - Historial de vacunas del paciente: {historial_de_vacunas}
-    - Sintomas del paciente: {sintomas}
-    - prompt inicial: {initial_prompt}
+    Eres un asistente medico especializado en analisis de datos medicos.
+    Tu tarea es analizar la siguiente consulta (o pregunta) y proporcionar una respuesta profesional y útil.
+    
+    **Instrucciones:**
+    1. Considera cuidadosamente toda la información del paciente
+    2. Prioriza información relevante del contexto médico
+    3. Si es necesario, pregunta por información adicional
+    4. Proporciona recomendaciones específicas y basadas en evidencia
+    5. Usa un lenguaje claro y comprensible para el paciente
+     
+    **Datos del Paciente:**
+    - Nombre: {user.first_name} {user.last_name}
+    - Email:  {user.email}
+    - Número: {user.telefono}
+    
+    {contexto_medico}
+
+    **contulta o pregunta del doctor a cargo:**
+    "{initial_prompt}"
+    
     """
     return generated_prompt.strip()
 
@@ -45,7 +53,7 @@ def ask_ollama(prompt):
     response = requests.post(
         'http://localhost:11434/api/generate',  # Endpoint de Ollama
         json={
-            "model": "gemma",  # Modelo a usar (puedes cambiarlo)
+            "model": 'gemma3:1b',  # Modelo a usar (puedes cambiarlo)
             "prompt": prompt,
             "stream": False  # Para obtener una respuesta completa
         }
@@ -72,20 +80,24 @@ class ProcessPromptView(APIView):
         # Paso 2: Generar un prompt más elaborado
         generated_prompt = generate_prompt(initial_prompt, request.user)
 
-        # Paso 3: Enviar el prompt final a Ollama y obtener la respuesta
+       # Paso 3: Generar un prompt final (opcional, según tu lógica)
+        final_prompt = ask_ollama(f"Por favor mejora el siguiente prompt{generated_prompt}")
+
+        # Paso 4: Enviar el prompt final a Ollama y obtener la respuesta
         bot_response = ask_ollama(generated_prompt)
 
-        # Paso 4: Guardar la conversación en la base de datos
-        Conversation.objects.create(
+        # Paso 5: Guardar la conversación en la base de datos
+        conversation = Conversation.objects.create(
+            user=request.user,
             initial_prompt=initial_prompt,
             generated_prompt=generated_prompt,
             bot_response=bot_response
         )
 
-        # Paso 5: Retornar la respuesta al usuario
+        # Paso 6: Retornar la respuesta al usuario
         return Response({
             'initial_prompt': initial_prompt,
             'generated_prompt': generated_prompt,
             'bot_response': bot_response,
-            'conversation_id': Conversation.id,
+            'conversation_id': conversation.id,
         }, status=status.HTTP_200_OK)

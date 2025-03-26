@@ -30,5 +30,5 @@ urlpatterns = [
     path('api/login/', login_view, name='login'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('process-prompt/', ProcessPromptView.as_view(), name='process_prompt'),
+    path('api/process-prompt/', ProcessPromptView.as_view(), name='process_prompt'),
 ]
