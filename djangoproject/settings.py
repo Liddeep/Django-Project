@@ -43,12 +43,12 @@ INSTALLED_APPS = [
     'gestion',
     'login',
     'rest_framework_simplejwt.token_blacklist',
-    'ia_chat'
+    'ia_chat',
+    'control_panel'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
