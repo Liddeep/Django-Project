@@ -1,10 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 # Create your models here.
 
 class Usuario(AbstractUser):
-    edad = models.IntegerField(blank=True, null=True)
+    edad = models.IntegerField(
+    blank=True, null=True,
+    validators=[MinValueValidator(0), MaxValueValidator(120)]
+)
     sexo = models.CharField(blank=True, null=True, max_length=1, choices=[
         ('M', 'Masculino'), ('F', 'Femenino'), ('O', 'Otro')
     ])
