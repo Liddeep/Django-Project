@@ -54,26 +54,41 @@ def generate_prompt(initial_prompt, user):
     return generated_prompt.strip(), "system_prompt"
 
 
-def ask_ollama(prompt):
+def ask_ollama(prompt, user):
     """
     Envía un prompt a Ollama y obtiene la respuesta del modelo.
     """
-    response = requests.post(
-        "http://localhost:11434/api/generate",  # Endpoint de Ollama
-        json={
-            "model": "gemma3:1b",  # Modelo a usar (puedes cambiarlo)
-            "prompt": prompt,
-            "stream": False,  # Para obtener una respuesta completa
-        },
-    )
+    
+    try:
+        # Obtener la configuración del ControlPanel
+        control_panel = ControlPanel.objects.filter(user=user).first()
+        temperature = control_panel.temperature if control_panel else 0.7  # Valor por defecto
+        max_tokens = control_panel.max_tokens if control_panel else 2048  # Valor por defecto
+    except Exception as e:
+        return f"Error al obtener configuración: {str(e)}"
 
-    if response.status_code == 200:
-        return response.json()["response"]
-    else:
-        return "Error: No se pudo obtener una respuesta del modelo."
+    payload = {
+        "model": "gemma3:1b",  # Modelo a usar (puedes cambiarlo)
+        "prompt": prompt,
+        "temperature": temperature,  # Parámetro opcional para controlar la creatividad
+        "max_tokens": max_tokens,  # Máximo de tokens en la respuesta
+        "stream": False,  # Para obtener una respuesta completa
+    }
+    
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/generate",  # Endpoint de Ollama
+            json=payload,
+        )
 
+        if response.status_code == 200:
+            return response.json()["response"]
+        else:
+            return "Error: {response.status_code} - {response.text}"
+    except Exception as e:
+        return f"Error en la conexión: {str(e)}"
 
-def ask_deepseek(prompt):
+def ask_deepseek(prompt, user):
     """
     Envía un prompt a la API de DeepSeek y obtiene la respuesta del modelo.
     """
@@ -81,17 +96,10 @@ def ask_deepseek(prompt):
     headers = {"Authorization": os.getenv("key"), "Content-Type": "application/json"}
 
     # Obtener la configuración del ControlPanel
-
     try:
-        control_panel = (
-            ControlPanel.objects.first()
-        )  # Ajusta según tu lógica para obtener el ControlPanel correcto
-        temperature = (
-            control_panel.temperature if control_panel else 0.7
-        )  # Valor por defecto
-        max_tokens = (
-            control_panel.max_tokens if control_panel else 2048
-        )  # Valor por defecto
+        control_panel = ControlPanel.objects.filter(user=user).first()  # Corrección del método
+        temperature = control_panel.temperature if control_panel else 0.7  # Valor por defecto
+        max_tokens = control_panel.max_tokens if control_panel else 2048  # Valor por defecto
     except Exception as e:
         return f"Error al obtener configuración: {str(e)}"
 
@@ -134,9 +142,7 @@ class ProcessPromptView(APIView):
         # Paso 2: Obtener el límite de mensajes del contexto desde el ControlPanel
         try:
             control_panel = ControlPanel.objects.filter(user=request.user).first()
-            context_length = (
-                control_panel.context_length if control_panel else 20
-            )  # Valor por defecto
+            context_length = control_panel.context_length if control_panel else 20  # Valor por defecto
         except Exception as e:
             return Response(
                 {"error": f"Error al obtener el contexto: {str(e)}"},
@@ -157,16 +163,29 @@ class ProcessPromptView(APIView):
         )
 
         # Paso 5: Generar un prompt más elaborado
-        generated_prompt = generate_prompt(initial_prompt, request.user)
+        generated_prompt, _ = generate_prompt(initial_prompt, request.user)  # Corrección: se desestructura el retorno
         final_prompt = f"{context_messages}\n\n{generated_prompt}"
 
         # Paso 6: Generar un prompt final (opcional, según tu lógica)
-        final_prompt = ask_deepseek(
-            f"Por favor mejora el siguiente prompt (sin hacer ninguna referencia a que es un prompt mejorado) :{generated_prompt}"
-        )
+        try:
+            final_prompt = ask_deepseek(
+                f"Por favor mejora el siguiente prompt (sin hacer ninguna referencia a que es un prompt mejorado): {generated_prompt}",
+                request.user,  # Corrección: se pasa el usuario como argumento
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error al mejorar el prompt: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         # Paso 7: Enviar el prompt final a Ollama y obtener la respuesta
-        bot_response = ask_deepseek(final_prompt)
+        try:
+            bot_response = ask_deepseek(final_prompt, request.user)  # Corrección: se pasa el usuario como argumento
+        except Exception as e:
+            return Response(
+                {"error": f"Error al obtener la respuesta del modelo: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         # Paso 8: Guardar la conversación en la base de datos
         conversation = Conversation.objects.create(
