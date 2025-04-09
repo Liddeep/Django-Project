@@ -93,7 +93,7 @@ def ask_deepseek(prompt, user):
     Envía un prompt a la API de DeepSeek y obtiene la respuesta del modelo.
     """
     # Configuración de la API de DeepSeek
-    headers = {"Authorization": os.getenv("key"), "Content-Type": "application/json"}
+    headers = {"Authorization": os.getenv("ia_key"), "Content-Type": "application/json"}
 
     # Obtener la configuración del ControlPanel
     try:
