@@ -18,6 +18,8 @@ def generate_prompt(initial_prompt, user):
     try:
         # Obtener las instrucciones del ControlPanel
         control_panel = ControlPanel.objects.filter(user=user).first()
+        doctor = control_panel.Doctor if control_panel else "Desconocido"
+        doctor_especialidad = control_panel.Doctor_especialidad if control_panel else "General"
         system_prompt = (
             control_panel.system_prompt
             if control_panel and control_panel.system_prompt
@@ -40,6 +42,12 @@ def generate_prompt(initial_prompt, user):
     Nombre               = {user.first_name} {user.last_name}
     Email                = {user.email}
     Número               = {user.telefono}
+    Fecha de nacimiento  = {user.fecha_nacimiento}
+    Edad                 = {user.edad}
+    Sexo                 = {user.sexo}
+    Dirección            = {user.direccion}
+    Enfermedades         = {user.enfermedades}
+    Historial médico     = {user.historial_vacunas}
     tipo_de_sangre       = {user.tipo_de_sangre}
     alergias             = {user.alergias}
     antecedentes_medicos = {user.antecedentes_medicos}
@@ -47,6 +55,7 @@ def generate_prompt(initial_prompt, user):
     historial_de_vacunas = {user.historial_vacunas}
     sintomas             = {user.sintomas}
 
+    En esta ocasión, el doctor a cargo es {doctor} y su especialidad es {doctor_especialidad}.
     **contulta o pregunta del doctor a cargo:**
     "{initial_prompt}"
     
@@ -64,6 +73,8 @@ def ask_ollama(prompt, user):
         control_panel = ControlPanel.objects.filter(user=user).first()
         temperature = control_panel.temperature if control_panel else 0.7  # Valor por defecto
         max_tokens = control_panel.max_tokens if control_panel else 2048  # Valor por defecto
+        doctor = control_panel.Doctor if control_panel else "Desconocido"
+        doctor_especialidad = control_panel.Doctor_especialidad if control_panel else "General"
     except Exception as e:
         return f"Error al obtener configuración: {str(e)}"
 
