@@ -73,8 +73,6 @@ def ask_ollama(prompt, user):
         control_panel = ControlPanel.objects.filter(user=user).first()
         temperature = control_panel.temperature if control_panel else 0.7  # Valor por defecto
         max_tokens = control_panel.max_tokens if control_panel else 2048  # Valor por defecto
-        doctor = control_panel.Doctor if control_panel else "Desconocido"
-        doctor_especialidad = control_panel.Doctor_especialidad if control_panel else "General"
     except Exception as e:
         return f"Error al obtener configuración: {str(e)}"
 
