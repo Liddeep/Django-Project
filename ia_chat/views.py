@@ -168,7 +168,7 @@ class ProcessPromptView(APIView):
 
         # Paso 6: Generar un prompt final (opcional, según tu lógica)
         try:
-            final_prompt = ask_deepseek(
+            final_prompt = ask_ollama(
                 f"Por favor mejora el siguiente prompt (sin hacer ninguna referencia a que es un prompt mejorado): {generated_prompt}",
                 request.user,  # Corrección: se pasa el usuario como argumento
             )
@@ -180,7 +180,7 @@ class ProcessPromptView(APIView):
 
         # Paso 7: Enviar el prompt final a Ollama y obtener la respuesta
         try:
-            bot_response = ask_deepseek(final_prompt, request.user)  # Corrección: se pasa el usuario como argumento
+            bot_response = ask_ollama(final_prompt, request.user)  # Corrección: se pasa el usuario como argumento
         except Exception as e:
             return Response(
                 {"error": f"Error al obtener la respuesta del modelo: {str(e)}"},

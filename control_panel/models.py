@@ -38,6 +38,18 @@ class ControlPanel(models.Model):
         help_text="Número de mensajes a mantener en el contexto",
     )
 
+    Doctor = models.TextField(
+        blank=True,
+        verbose_name="Doctor",
+        help_text="Nombre del doctor a cargo",
+    )
+    
+    Doctor_especialidad = models.TextField(
+        blank=True,
+        verbose_name="Especialidad del Doctor",
+        help_text="Especialidad del doctor a cargo",
+    )
+
     # Configuración de funcionalidades
     save_chat_history = models.BooleanField(
         default=True, verbose_name="Guardar Historial de Chat"
